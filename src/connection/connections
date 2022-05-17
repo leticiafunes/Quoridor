@@ -1,0 +1,18 @@
+
+const auth_token = process.env.TOKEN;
+ 
+const uri =
+  "wss://4yyity02md.execute-api.us-east-1.amazonaws.com/ws?token=" + auth_token;
+
+var WebSocketClient = require("websocket").client;
+
+const client = new WebSocketClient();
+
+try {
+   client.connect(uri);
+} catch (error) {
+   console.log (error)
+}
+
+
+module.exports = client;
