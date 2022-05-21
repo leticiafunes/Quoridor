@@ -1,41 +1,27 @@
-
-import express from "express";
-
-import { Server as WebSocketServer } from "socket.io"; //Servidor de websockets
-import https from "http";
-
+const express = require("express");
+const { Server } = require("socket.io"); //Websocket Server
+const https = require("http");
+const WebSocketServer = Server;
 const app = express();
 const server = https.createServer(app); //htts server uses express configuration
 const io = new WebSocketServer(server); //WSServer has a http server parameter.
 
 app.use(express.static(__dirname + "/public"));
 
-//settings - - -
-app.set ('port', process.env.PORT || 8000);
+app.set("port", process.env.PORT || 5000);
 
-io.on("connection", (socket) => {
-  console.log("New connection" + socket);
+try {
+  io.on("connection", (socket) => {
+    console.log(`New connection: ${socket}`);
+  });
+} catch (error) {
+  console.log(`Connection error : ${error}`);
+}
+
+server.listen(process.env.PORT_SERVER, () => {
+  console.log(`Listening on port : ${process.env.PORT_SERVER}`);
 });
 
-server.listen(3000, () => {
-  console.log("Listening on port 3000");
-});
-
-const routes = require('./routes/routes');
-
-
-  function sendNumber() {
-    if (connection.connected) {
-      var number = Math.round(Math.random() * 0xffffff);
-      connection.sendUTF(number.toString());
-      setTimeout(sendNumber, 1000);
-    }
-  }
-  //sendNumber();
-
-
-
-
-
+const routes = require("./routes/routes");
 
 module.exports = app;

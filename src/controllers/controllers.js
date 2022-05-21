@@ -4,8 +4,11 @@ const { join } = require("path");
 const { server } = require("websocket");
 const fs = require('fs')
 
-let { select_move, find_paws} = require("../utils/matrix");
+let { find_paws} = require("../utils/matrix");
+let { select_move} = require("../controllers/moves_controller");
 const { paintboard } = require("../utils/paint");
+const {from_matrix_to_board} = require ("../utils/testing")
+
 
 quoridorCtrl.connectError = (error) => {
   console.log("Connect Error: " + error.toString());
@@ -48,7 +51,6 @@ quoridorCtrl.connectOk_error = (error) => {
 quoridorCtrl.connectOK_close = () => {
   console.log("echo-protocol Connection Closed");
 }
-
 
 const list_users = function (server_message) {
   let console_message = "Users connected: ";
@@ -153,7 +155,7 @@ const your_turn = function (server_message, connection) {
 
 const matrix = [
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
     ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
@@ -196,7 +198,7 @@ const matrix = [
   ],
   
   [
-    ' ', ' ', ' ', ' ', 'N', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
+    ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
   ],
   [
     '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', ' '
@@ -206,26 +208,12 @@ const matrix = [
   ]
 ]
 
-
-
-  //const board = convertir_a_board (matrix)
+  const board = from_matrix_to_board (matrix)
   //console.log ('A'+ board+'A')
   //const paws_nexts = find_nexts (paws, matrix);
 
-  //const move = select_move (board,  'N')  
+  const move = select_move (board,  'N')  
    
 
-/*
-  function convertir_a_board (matrix) {
-    let board = '';
-    for (let i = 0; i< matrix.length; i++) {
-      for (let j = 0; j< matrix.length; j++) {
 
-         board = board + matrix [i][j];
-      
-      }
-    }
-    return board;
-  }
-*/
 module.exports = quoridorCtrl;

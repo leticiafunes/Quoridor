@@ -1,6 +1,7 @@
-import { find_paws} from "./matrix_test.js";
+import { find_paws, convert_to_board} from "../controllers/matrix_controller.js";
 
-import { select_move, convertir_a_board} from "./matrix.js";
+import { select_move,} from "../controllers/moves_controller.js";
+
 
 test('Find six paws on board', () => {
     const matrix = [
@@ -263,7 +264,7 @@ test('Find six paws on board', () => {
     ]
   
 
-  const board = convertir_a_board (matrix)
+  const board = convert_to_board (matrix)
   const out = { trace_length: 8, row_orig: 4, col_orig: 8, row_dest: 4, col_dest: 6 }
 
 
@@ -332,7 +333,7 @@ test('With behind mob', () => {
   ]
   
 
-const board = convertir_a_board (matrix)
+const board = convert_to_board (matrix)
 const out = {
   trace_length: 3,
   row_orig: 14,
