@@ -31,6 +31,10 @@ ctrlMoves.select_move = (board, player) => {
   let shortest_player = null;
   let shortest_opponent = null;
 
+  
+  console.log (ways)
+   
+
   if (ways.length > 0) {
     shortest_player = shortest_way(ways);
   }
