@@ -7,9 +7,9 @@ var WebSocketClient = require("websocket").client;
 const client = new WebSocketClient();
 
 try {
-   //client.connect(uri);
+ client.connect(uri);
 } catch (error) {
-  // console.log (error)
+  console.log (error)
 }
 
 module.exports = client;

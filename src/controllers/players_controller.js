@@ -8,4 +8,4 @@ playersCtrl.opponent_player = (player) => {
     return opponent;
   };
 
-  module.exports = playersCtrl;
+module.exports = playersCtrl;

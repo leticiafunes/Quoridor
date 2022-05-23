@@ -1,8 +1,5 @@
 import { select_move,} from "../controllers/moves_controller.js";
-
 import { from_matrix_to_board} from "../utils/testing.js";
-
-
 
 const matrix = [
     [
@@ -57,24 +54,21 @@ const matrix = [
     [
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' '
     ]
-  ]
-const board = from_matrix_to_board (matrix)
+]
 
-  test ('Select next move', () => {
-  
-    const expected = {
-        trace_length: 3,
-        row_orig: 14,
-        col_orig: 14,
-        row_dest: 14,
-        col_dest: 16
-      }
-      
-      
-    let next_move = {}
-    next_move = select_move (board, 'N') 
+const board = from_matrix_to_board(matrix);
 
-     expect(next_move).toMatchObject(expected);
-    
-  
-  })
+test("Select next move", () => {
+  const expected = {
+    trace_length: 3,
+    row_orig: 14,
+    col_orig: 14,
+    row_dest: 14,
+    col_dest: 16,
+  };
+
+  let next_move = {};
+  next_move = select_move(board, "N");
+
+  expect(next_move).toMatchObject(expected);
+});

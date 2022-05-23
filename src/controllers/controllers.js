@@ -8,6 +8,7 @@ let { find_paws} = require("../utils/matrix");
 let { select_move} = require("../controllers/moves_controller");
 const { paintboard } = require("../utils/paint");
 const {from_matrix_to_board} = require ("../utils/testing")
+const {writeLog} = require ("../utils/utils")
 
 
 quoridorCtrl.connectError = (error) => {
@@ -23,13 +24,16 @@ quoridorCtrl.connectOk = (connection) => {
   connection.on("close", quoridorCtrl.connectOK_close);
 
   connection.on("message", (message) => {
+
+    
     if (message.type === "utf8") {
       let server_message = JSON.parse(message.utf8Data);
+      console.log (server_message.event );
 
       if (server_message.event == "list_users") {
         list_users(server_message);
       }
-
+      
       if (server_message.event == "challenge") {
         challenge(server_message, connection);
       }
@@ -77,64 +81,108 @@ const challenge = function (server_message, connection) {
 };
 
 const your_turn = function (server_message, connection) {
+
   let your_turn_answer = "";
 
+  
   if (server_message.data.side === "N") {
+   
+    
     const board = server_message.data.board;
-    const move = select_move(board, "N");
+    const remaining_walls = server_message.data.walls
+   
+    const move = select_move(board, "N", remaining_walls);
 
-    console.log("movement N");
-    console.log(move);
+    console.log ('move: ' + move);
+
     if (move) {
-      your_turn_answer = JSON.stringify({
-        action: "move",
-        data: {
-          game_id: server_message.data.game_id,
-          turn_token: server_message.data.turn_token,
-          from_row: move.row_orig / 2,
-          from_col: move.col_orig / 2,
-          to_row: move.row_dest / 2,
-          to_col: move.col_dest / 2,
-        },
-        hello: "Hi dear bot, I only know how to move paws N",
-      });
-    }
-  } else {
-    /* your_turn_answer = JSON.stringify(
-           
-        {
-            action: "wall",
+      if(move.type === 'move') {
+     
+        console.log("Movement N");
+       // console.log(move);
+  
+        your_turn_answer = JSON.stringify({
+          action: "move",
+          data: {
+            game_id: server_message.data.game_id,
+            turn_token: server_message.data.turn_token,
+            from_row: move.row_orig ,
+            from_col: move.col_orig ,
+            to_row: move.row_dest ,
+            to_col: move.col_dest ,
+          },
+          hello: "Hi dear bot, I only know how to move paws N",
+        });
+      }
+      else {
+        your_turn_answer = JSON.stringify(
+             
+          {
+              action: "wall",
+              data: {
+                game_id: server_message.data.game_id,
+                turn_token: server_message.data.turn_token,
+                row: move.row_dest,
+                col: move.col_dest,
+                orientation: "h",
+              },
+              hello: "Hi dear bot, I only know how to build a horizontal wall N",
+            }
+          );
+      }
+    } 
+  
+
+  } 
+  else {
+
+      const board = server_message.data.board;
+      const remaining_walls = server_message.data.walls
+      
+      const move = select_move(board, "S",remaining_walls);
+      if (move) {
+        if (move.type === 'move') {
+          console.log("Movement S");
+         // console.log(move);
+    
+          your_turn_answer = JSON.stringify({
+            action: "move",
             data: {
               game_id: server_message.data.game_id,
               turn_token: server_message.data.turn_token,
-              row: 0,
-              col: 0,
-              orientation: "h",
+              from_row: move.row_orig,
+              from_col: move.col_orig,
+              to_row: move.row_dest,
+              to_col: move.col_dest,
             },
-            hello: "Hi dear bot, I only know how to build a horizontal wall",
-          }
-        );
-*/
+            hello: "Hi dear bot, I only know how to move paws S",
+          });
+        }
+        else {
+          your_turn_answer = JSON.stringify(
+               
+            {
+                action: "wall",
+                data: {
+                  game_id: server_message.data.game_id,
+                  turn_token: server_message.data.turn_token,
+                  row: move.row_dest,
+                  col: move.col_dest,
+                  orientation: "h",
+                },
+                hello: "Hi dear bot, I only know how to build a horizontal wall S",
+              }
+            );
+    
+        }
+      }
 
-    const board = server_message.data.board;
-    const move = select_move(board, "S");
-    console.log("movement S");
-    console.log(move);
-    if (move) {
-      your_turn_answer = JSON.stringify({
-        action: "move",
-        data: {
-          game_id: server_message.data.game_id,
-          turn_token: server_message.data.turn_token,
-          from_row: move.row_orig / 2,
-          from_col: move.col_orig / 2,
-          to_row: move.row_dest / 2,
-          to_col: move.col_dest / 2,
-        },
-        hello: "Hi dear bot, I only know how to move paws S",
-      });
+      
+  
+
     }
-  }
+  
+   
   if (your_turn_answer.length > 0) {
     const answer = connection.sendUTF(your_turn_answer);
     console.log(
@@ -208,11 +256,12 @@ const matrix = [
   ]
 ]
 
-  const board = from_matrix_to_board (matrix)
+  //writeLog ("fede2.txt")
+  //const board = from_matrix_to_board (matrix)
   //console.log ('A'+ board+'A')
   //const paws_nexts = find_nexts (paws, matrix);
 
-  const move = select_move (board,  'N')  
+ // const move = select_move (board,  'S')  
    
 
 

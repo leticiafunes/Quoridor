@@ -265,7 +265,12 @@ test('Find six paws on board', () => {
   
 
   const board = convert_to_board (matrix)
-  const out = { trace_length: 8, row_orig: 4, col_orig: 8, row_dest: 4, col_dest: 6 }
+  const out = { trace_length: 8, 
+    row_orig: 4, 
+    col_orig: 8, 
+    row_dest: 4, 
+    col_dest: 6,
+    type: "move" }
 
 
     const result = select_move (board, 'N')
@@ -339,7 +344,8 @@ const out = {
   row_orig: 14,
   col_orig: 14,
   row_dest: 14,
-  col_dest: 16
+  col_dest: 16, 
+  type: "move"
 }
 
 

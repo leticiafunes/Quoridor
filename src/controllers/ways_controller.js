@@ -2,70 +2,10 @@ const waysCtrl = {};
 
 const { inTrace } = require("./paws_controllers");
 const { opponent_player } = require("./players_controller");
+const { nextLine, empty, insideBoard} = require("./common");
 
-/*
-waysCtrl.find_way = (paw, trace, player, matrix)  =>{
-  
-    let in_trace = false;
-    in_trace = inTrace(paw, trace);
-  
-    if (
-      (player === "N" && (paw.row === 16 || in_trace)) ||
-      (player === "S" && (paw.row === 0 || in_trace))
-    ) {
-      if (in_trace) {
-        return null;
-      } else {
-        trace.push(paw);
-        return trace;
-      }
-    } else {
-      let next_cell = null;
-  
-      next_cell = find_forward_cell(paw, player, matrix);
-  
-      if (next_cell && !inTrace(next_cell, trace)) {
-        trace.push(paw);
-        const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
-  
-        return the_way;
-      } else {
-        next_cell = find_forward_jump_cell(paw, player, matrix);
-  
-        if (next_cell && !inTrace(next_cell, trace)) {
-          trace.push(paw);
-          const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
-          return the_way;
-        } else {
-          next_cell = find_right_left(paw, player, trace, matrix);
-  
-          if (next_cell && !inTrace(next_cell, trace)) {
-            trace.push(paw);
-            const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
-            return the_way;
-          } else {
-            next_cell = find_behind_cell(paw, player, matrix);
-            if (next_cell && !inTrace(next_cell, trace)) {
-              trace.push(paw);
-              trace.push(next_cell);
-              return trace;
-            } else {
-              next_cell = find_behind_jump_cell(paw, player, matrix);
-              if (next_cell && !inTrace(next_cell, trace)) {
-                trace.push(paw);
-                trace.push(next_cell);
-                return trace;
-              }
-            }
-          }
-        }
-      }
-  
-      return next_cell;
-    }
-}
-*/
-waysCtrl.find_way2 = (paw, trace, player, matrix) => {
+
+waysCtrl.find_way = (paw, trace, player, matrix) => {
   let in_trace = false;
   in_trace = inTrace(paw, trace);
 
@@ -80,7 +20,7 @@ waysCtrl.find_way2 = (paw, trace, player, matrix) => {
       return trace;
     }
   } else {
-    let next_cell = null;
+        let next_cell = null;
     let the_way = null;
 
     the_way = find_forward_way(paw, player, matrix, trace);
@@ -102,121 +42,49 @@ waysCtrl.find_way2 = (paw, trace, player, matrix) => {
   }
 };
 
+waysCtrl.shortest_way = (ways) => {
+  let shortest_way = {};
+  let shortest_way_index = 0;
 
-function find_forward_way (paw, player, matrix, trace) {
-  
-  
-  let next_cell = null;
-
-  next_cell = waysCtrl.find_cell(paw, player, matrix, "forward");
-
-  if (next_cell && !inTrace(next_cell, trace)) {
-    trace.push(paw);
-    const the_way = waysCtrl.find_way2(next_cell, trace, player, matrix);
-
-    return the_way;
-  } else {
-    
-    next_cell = waysCtrl.find_cell_jump (paw ,player, matrix, "forward") 
-
-    if (next_cell && !inTrace(next_cell, trace)) {
-      trace.push(paw);
-      const the_way = waysCtrl.find_way2(next_cell, trace, player, matrix);
-      return the_way;
-    } else {
-
-      next_cell = waysCtrl.find_cell_jump (paw ,player, matrix, "forward_diagonal") 
-      if (next_cell && !inTrace(next_cell, trace)) {
-        trace.push(paw);
-        const the_way = waysCtrl.find_way2(next_cell, trace, player, matrix);
-        return the_way;
+  if (ways.length > 0) {
+    for (let i = 1; i < ways.length; i++) {
+      if (ways[shortest_way_index].length > ways[i].length) {
+        if (ways[i][1].row >= ways[shortest_way_index][1].row) {
+          shortest_way_index = i;
+        }
+      } else {
+        if (with_final(ways[i]) && !with_final(ways[shortest_way_index])) {
+          shortest_way_index = i;
+        }
       }
     }
-  }
-}
 
-function find_lateral_way (paw, player, matrix, trace) {
-  
-  let next_cell = null;
-  let the_way = null;
-
-  next_cell = find_right_left(paw, player, trace, matrix);
-
-  if (next_cell && !inTrace(next_cell, trace)) {
-    trace.push(paw);
-    the_way = waysCtrl.find_way2(next_cell, trace, player, matrix);
-    return the_way;
-  } 
-  return the_way;
-
-}
-
-
-function find_behind_way (paw, player, matrix, trace) {
-  let next_cell = null;
-  let the_way = null;
-
-  next_cell = waysCtrl.find_cell(paw, player, matrix, "behind");
-  if (next_cell && !inTrace(next_cell, trace)) {
-    trace.push(paw);
-    trace.push(next_cell);
-    trace.push(null);
-    return trace;
-  } else {
-    next_cell = find_behind_jump_cell(paw, player, matrix);
-    if (next_cell && !inTrace(next_cell, trace)) {
-      trace.push(paw);
-      trace.push(next_cell);
-      return trace;
+    if (ways[shortest_way_index][0]) {
+      const next_move = {
+        trace_length: ways[shortest_way_index].length,
+        row_orig: ways[shortest_way_index][0].row,
+        col_orig: ways[shortest_way_index][0].col,
+        row_dest: ways[shortest_way_index][1].row,
+        col_dest: ways[shortest_way_index][1].col,
+      };
     }
-  
-    
+    return ways[shortest_way_index];
+  } else {
+    setTimeout(function () {
+      console.log("There are no paths enabled");
+    }, 7000);
+    return null;
   }
-  return the_way;
-}
+};
 
-
-function insideBoard(row, col) {
-  let result = false;
-
-  if (row >= 0 && row < 17 && col >= 0 && col < 17) {
-    result = true;
-  }
-
-  //console.log ('inside board: ' + result)
-
-  return result;
-}
-
-function nextLine(row, col, direction, steps) {
-  let line = -1;
-  switch (direction) {
-    case "forward":
-      line = row + steps;
-      break;
-    case "right":
-      line = col + steps;
-      break;
-    case "left":
-      line = col - steps;
-      break;
-    case "behind":
-      line = row - steps;
-      break;
-    default:
-      console.log(`Wrong line`);
-  }
-  return line;
-}
-
-waysCtrl.find_cell = (paw, paw_type, matrix, direction) => {
+waysCtrl.find_cell = (paw, player, matrix, direction) => {
   let next_row = paw.row;
   let next_col = paw.col;
   let next_darkline_row = paw.row;
   let next_darkline_col = paw.col;
   let cell = null;
   let sign = 1;
-  if (paw_type == "S") {
+  if (player == "S") {
     sign = -1;
   }
 
@@ -243,8 +111,8 @@ waysCtrl.find_cell = (paw, paw_type, matrix, direction) => {
 
   if (
     insideBoard(next_row, next_col) &&
-    nowall(matrix[next_darkline_row][next_darkline_col]) &&
-    permitted(matrix[next_row][next_col])
+    empty(matrix[next_darkline_row][next_darkline_col]) &&
+    empty(matrix[next_row][next_col])
   ) {
     cell = {
       id: paw.id,
@@ -333,10 +201,10 @@ waysCtrl.find_cell_jump = (paw, paw_type, matrix, direction) => {
   if (
     insideBoard(next_row, next_col) &&
     taken(matrix[taken_row][taken_col], paw_type) &&
-    nowall(matrix[next_darkline_row][next_darkline_col]) &&
+    empty(matrix[next_darkline_row][next_darkline_col]) &&
     insideBoard(after_next_darkline_row, after_next_darkline_col) &&
-    nowall(matrix[after_next_darkline_row][after_next_darkline_col]) &&
-    permitted(matrix[next_row][next_col])
+    empty(matrix[after_next_darkline_row][after_next_darkline_col]) &&
+    empty(matrix[next_row][next_col])
   ) {
     cell = {
       id: paw.id,
@@ -348,11 +216,11 @@ waysCtrl.find_cell_jump = (paw, paw_type, matrix, direction) => {
     if (
       insideBoard(next_row, next_col_right) &&
       taken(matrix[taken_row][taken_col_right], paw_type) &&
-      nowall(matrix[next_darkline_row][next_col]) &&
-      permitted(matrix[next_row][next_col_right]) &&
+      empty(matrix[next_darkline_row][next_col]) &&
+      empty(matrix[next_row][next_col_right]) &&
       insideBoard(after_next_darkline_row, after_next_darkline_col_right) &&
-      !nowall(matrix[after_next_darkline_row][after_next_darkline_col_right]) &&
-      nowall(matrix[taken_row][next_darkline_col_right])
+      !empty(matrix[after_next_darkline_row][after_next_darkline_col_right]) &&
+      empty(matrix[taken_row][next_darkline_col_right])
     ) {
       cell = {
         id: paw.id,
@@ -364,13 +232,13 @@ waysCtrl.find_cell_jump = (paw, paw_type, matrix, direction) => {
       if (
         insideBoard(next_row, next_col_left) &&
         taken(matrix[taken_row][taken_col_left], paw_type) &&
-        nowall(matrix[next_darkline_row][next_darkline_col]) &&
-        permitted(matrix[next_row][next_col_left]) &&
+        empty(matrix[next_darkline_row][next_darkline_col]) &&
+        empty(matrix[next_row][next_col_left]) &&
         insideBoard(after_next_darkline_row, after_next_darkline_col_left) &&
-        !nowall(
+        !empty(
           matrix[after_next_darkline_row][after_next_darkline_col_left]
         ) &&
-        nowall(matrix[taken_row][next_darkline_col_left])
+        empty(matrix[taken_row][next_darkline_col_left])
       ) {
         cell = {
           id: paw.id,
@@ -385,156 +253,79 @@ waysCtrl.find_cell_jump = (paw, paw_type, matrix, direction) => {
   return cell;
 };
 
-/*
-  function find_forward_cell(paw, paw_type, matrix, trace) {
-    let cell = null;
+function find_forward_way (paw, player, matrix, trace) {
   
-    if (paw_type === "N") {
-      let forward_row = paw.row + 2;
   
-      if (
-        forward_row < 17 &&
-        nowall(matrix[paw.row + 1][paw.col]) &&
-        permitted(matrix[forward_row][paw.col])
-      ) {
-        cell = {
-          id: paw.id,
-          row: forward_row,
-          col: paw.col,
-        };
-      }
-    } else {
-      let forward_row = paw.row - 2;
-  
-      if (
-        forward_row >= 0 &&
-        nowall(matrix[paw.row - 1][paw.col]) &&
-        permitted(matrix[forward_row][paw.col])
-      ) {
-        cell = {
-          id: paw.id,
-          row: forward_row,
-          col: paw.col,
-        };
-      }
-    }
-  
-    return cell;
-  }*/
+  let next_cell = null;
 
-function find_forward_jump_cell(paw, paw_type, matrix, trace) {
-  let cell = null;
-  if (paw_type === "N") {
-    let forward_row_jump = paw.row + 4;
+  next_cell = waysCtrl.find_cell(paw, player, matrix, "forward");
 
-    if (
-      forward_row_jump < 17 &&
-      taken(matrix[paw.row + 2][paw.col], "S") &&
-      nowall(matrix[paw.row + 1][paw.col]) &&
-      nowall(matrix[paw.row + 3][paw.col]) &&
-      permitted(matrix[paw.row + 4][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: forward_row_jump,
-        col: paw.col,
-      };
-    } else {
-      let forward_row_jump = paw.row + 2;
-      let forward_col_jump_right = paw.col + 2;
-      let forward_col_jump_left = paw.col - 2;
+  if (next_cell && !inTrace(next_cell, trace)) {
+    trace.push(paw);
+    const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
 
-      if (
-        forward_row_jump < 17 &&
-        forward_col_jump_right < 17 &&
-        paw.row + 3 < 17 &&
-        taken(matrix[paw.row + 2][paw.col], "S") &&
-        nowall(matrix[paw.row + 1][paw.col]) &&
-        !nowall(matrix[paw.row + 3][paw.col]) &&
-        permitted(matrix[forward_row_jump][forward_col_jump_right])
-      ) {
-        cell = {
-          id: paw.id,
-          row: forward_row_jump,
-          col: forward_col_jump_right,
-        };
-      } else {
-        if (
-          forward_row_jump < 17 &&
-          forward_col_jump_left >= 0 &&
-          paw.row + 3 < 17 &&
-          taken(matrix[paw.row + 2][paw.col], "S") &&
-          nowall(matrix[paw.row + 1][paw.col]) &&
-          !nowall(matrix[paw.row + 3][paw.col]) &&
-          permitted(matrix[forward_row_jump][forward_col_jump_left])
-        ) {
-          cell = {
-            id: paw.id,
-            row: forward_row_jump,
-            col: forward_col_jump_left,
-          };
-        }
-      }
-    }
+    return the_way;
   } else {
-    let forward_row_jump = paw.row - 4;
+    
+    next_cell = waysCtrl.find_cell_jump (paw ,player, matrix, "forward") 
 
-    if (
-      forward_row_jump >= 0 &&
-      taken(matrix[paw.row - 2][paw.col], "N") &&
-      paw.row - 3 >= 0 &&
-      nowall(matrix[paw.row - 1][paw.col]) &&
-      nowall(matrix[paw.row - 3][paw.col]) &&
-      permitted(matrix[forward_row_jump][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: forward_row_jump,
-        col: paw.col,
-      };
+    if (next_cell && !inTrace(next_cell, trace)) {
+      trace.push(paw);
+      const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
+      return the_way;
     } else {
-      let forward_row_jump = paw.row - 2;
-      let forward_col_jump_right = paw.col + 2;
-      let forward_col_jump_left = paw.col - 2;
 
-      if (
-        forward_row_jump >= 0 &&
-        forward_col_jump_right < 17 &&
-        taken(matrix[paw.row - 2][paw.col], "N") &&
-        paw.row - 3 >= 0 &&
-        nowall(matrix[paw.row - 1][paw.col]) &&
-        !nowall(matrix[paw.row - 3][paw.col]) &&
-        permitted(matrix[forward_row_jump][forward_col_jump_right]) &&
-        nowall(matrix[forward_row_jump - 1][forward_col_jump_right - 1])
-      ) {
-        cell = {
-          id: paw.id,
-          row: forward_row_jump - 1,
-          col: forward_col_jump_right - 1,
-        };
-      } else {
-        if (
-          forward_row_jump >= 0 &&
-          forward_col_jump_left >= 0 &&
-          taken(matrix[paw.row - 2][paw.col], "N") &&
-          paw.row - 3 >= 0 &&
-          !nowall(matrix[paw.row - 3][paw.col]) &&
-          nowall(matrix[paw.row - 1][paw.col]) &&
-          permitted(matrix[forward_row_jump][forward_col_jump_left]) &&
-          nowall(matrix[forward_row_jump + 1][forward_col_jump_left + 1])
-        ) {
-          cell = {
-            id: paw.id,
-            row: forward_row_jump + 1,
-            col: forward_col_jump_left + 1,
-          };
-        }
+      next_cell = waysCtrl.find_cell_jump (paw ,player, matrix, "forward_diagonal") 
+      if (next_cell && !inTrace(next_cell, trace)) {
+        trace.push(paw);
+        const the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
+        return the_way;
       }
     }
   }
-
-  return cell;
 }
+
+function find_lateral_way (paw, player, matrix, trace) {
+  
+  let next_cell = null;
+  let the_way = null;
+
+  next_cell = find_right_left(paw, player, trace, matrix);
+
+  if (next_cell && !inTrace(next_cell, trace)) {
+    trace.push(paw);
+    the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
+    return the_way;
+  } 
+  return the_way;
+
+}
+
+function find_behind_way (paw, player, matrix, trace) {
+  let next_cell = null;
+  let the_way = null;
+
+  next_cell = waysCtrl.find_cell(paw, player, matrix, "behind");
+  if (next_cell && !inTrace(next_cell, trace)) {
+    trace.push(paw);
+    trace.push(next_cell);
+    trace.push(null);
+    return trace;
+  } else {
+    next_cell = waysCtrl.find_cell_jump (paw, player, matrix, "behind");
+    if (next_cell && !inTrace(next_cell, trace)) {
+      trace.push(paw);
+      trace.push(next_cell);
+      return trace;
+    }
+  
+    
+  }
+  return the_way;
+}
+
+
+
 
 function find_right_cell(paw, paw_type, matrix) {
   let cell = null;
@@ -542,8 +333,8 @@ function find_right_cell(paw, paw_type, matrix) {
 
   if (
     right_col < 17 &&
-    nowall(matrix[paw.row][paw.col + 1]) &&
-    permitted(matrix[paw.row][paw.col + 2])
+    empty(matrix[paw.row][paw.col + 1]) &&
+    empty(matrix[paw.row][paw.col + 2])
   ) {
     cell = {
       id: paw.id,
@@ -561,8 +352,8 @@ function find_left_cell(paw, paw_type, matrix) {
   let left_col = paw.col - 1;
   if (
     left_col >= 0 &&
-    nowall(matrix[paw.row][paw.col - 1]) &&
-    permitted(matrix[paw.row][paw.col - 2])
+    empty(matrix[paw.row][paw.col - 1]) &&
+    empty(matrix[paw.row][paw.col - 2])
   ) {
     cell = {
       id: paw.id,
@@ -590,7 +381,7 @@ function find_right_left(paw, player, trace, matrix) {
     if (!in_trace) {
       trace_right = [...trace];
       trace_right.push(paw);
-      right_way = waysCtrl.find_way2(
+      right_way = waysCtrl.find_way(
         next_cell_right,
         trace_right,
         player,
@@ -607,11 +398,11 @@ function find_right_left(paw, player, trace, matrix) {
 
   if (next_cell_left) {
     let in_trace = false;
-    in_trace = inTrace(next_cell_left, trace); //Aca esta fallando. No lo encuentra en el camino y lo deberia llevar
+    in_trace = inTrace(next_cell_left, trace); 
     if (!in_trace) {
       trace_left = [...trace];
       trace_left.push(paw);
-      left_way = waysCtrl.find_way2(next_cell_left, trace_left, player, matrix);
+      left_way = waysCtrl.find_way(next_cell_left, trace_left, player, matrix);
     } else {
       left_way = null;
     }
@@ -644,215 +435,6 @@ function find_right_left(paw, player, trace, matrix) {
   }
 }
 
-function find_behind_cell(paw, paw_type, matrix) {
-  let cell = null;
-
-  if (paw_type === "N") {
-    let behind_row = paw.row - 2;
-
-    if (
-      behind_row >= 0 &&
-      nowall(matrix[paw.row - 1][paw.col]) &&
-      permitted(matrix[behind_row][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: behind_row,
-        col: paw.col,
-      };
-    }
-  } else {
-    let behind_row = paw.row + 2;
-
-    if (
-      behind_row < 17 &&
-      nowall(matrix[paw.row + 1][paw.col]) &&
-      permitted(matrix[behind_row][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: behind_row,
-        col: paw.col,
-      };
-    }
-  }
-
-  return cell;
-}
-
-function find_behind_jump_cell(paw, paw_type, matrix) {
-  let cell = null;
-  if (paw_type === "N") {
-    let behind_row_jump = paw.row - 4;
-
-    if (
-      behind_row_jump >= 0 &&
-      taken(matrix[paw.row - 2][paw.col], "S") &&
-      nowall(matrix[paw.row - 1][paw.col]) &&
-      nowall(matrix[paw.row - 3][paw.col]) &&
-      permitted(matrix[paw.row - 4][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: behind_row_jump,
-        col: paw.col,
-      };
-    } else {
-      let behind_row_jump = paw.row - 2;
-      let behind_col_jump_right = paw.col + 2;
-      let behind_col_jump_left = paw.col - 2;
-
-      if (
-        behind_row_jump >= 0 &&
-        behind_col_jump_right < 17 &&
-        paw.row - 3 >= 0 &&
-        taken(matrix[paw.row - 2][paw.col], "S") &&
-        !nowall(matrix[paw.row - 3][paw.col]) &&
-        nowall(matrix[paw.row - 1][paw.col]) &&
-        permitted(matrix[behind_row_jump][behind_col_jump_right])
-      ) {
-        cell = {
-          id: paw.id,
-          row: behind_row_jump,
-          col: behind_col_jump_right,
-        };
-      } else {
-        if (
-          behind_row_jump >= 0 &&
-          behind_col_jump_left >= 0 &&
-          paw.row - 3 >= 0 &&
-          taken(matrix[paw.row - 2][paw.col], "S") &&
-          !nowall(matrix[paw.row - 3][paw.col]) &&
-          nowall(matrix[paw.row - 1][paw.col]) &&
-          permitted(matrix[behind_row_jump][behind_col_jump_left])
-        ) {
-          cell = {
-            id: paw.id,
-            row: behind_row_jump,
-            col: behind_col_jump_left,
-          };
-        }
-      }
-    }
-  } else {
-    let behind_row_jump = paw.row + 4;
-
-    if (
-      behind_row_jump < 17 &&
-      taken(matrix[paw.row + 2][paw.col], "N") &&
-      paw.row + 3 >= 0 &&
-      nowall(matrix[paw.row + 1][paw.col]) &&
-      nowall(matrix[paw.row + 3][paw.col]) &&
-      permitted(matrix[behind_row_jump][paw.col])
-    ) {
-      cell = {
-        id: paw.id,
-        row: behind_row_jump,
-        col: paw.col,
-      };
-    } else {
-      let behind_row_jump = paw.row + 2;
-      let behind_col_jump_right = paw.col + 2;
-      let behind_col_jump_left = paw.col - 2;
-
-      if (
-        behind_row_jump < 17 &&
-        behind_col_jump_right < 17 &&
-        taken(matrix[paw.row + 2][paw.col], "N") &&
-        paw.row + 3 >= 0 &&
-        !nowall(matrix[paw.row + 3][paw.col]) &&
-        nowall(matrix[paw.row + 1][paw.col]) &&
-        permitted(matrix[behind_row_jump][behind_col_jump_right]) &&
-        nowall(matrix[behind_row_jump - 1][behind_col_jump_right - 1])
-      ) {
-        cell = {
-          id: paw.id,
-          row: behind_row_jump - 1,
-          col: behind_col_jump_right - 1,
-        };
-      } else {
-        if (
-          behind_row_jump < 17 &&
-          behind_col_jump_left >= 0 &&
-          taken(matrix[paw.row + 2][paw.col], "N") &&
-          paw.row + 3 >= 0 &&
-          !nowall(matrix[paw.row + 3][paw.col]) &&
-          nowall(matrix[paw.row + 1][paw.col]) &&
-          permitted(matrix[behind_row_jump][behind_col_jump_left]) &&
-          nowall(matrix[behind_row_jump + 1][behind_col_jump_left + 1])
-        ) {
-          cell = {
-            id: paw.id,
-            row: behind_row_jump + 1,
-            col: behind_col_jump_left + 1,
-          };
-        }
-      }
-    }
-  }
-
-  return cell;
-}
-
-waysCtrl.shortest_way = (ways) => {
-  let shortest_way = {};
-  let shortest_way_index = 0;
-
-  if (ways.length > 0) {
-    for (let i = 1; i < ways.length; i++) {
-      if (ways[shortest_way_index].length > ways[i].length) {
-        if (ways[i][1].row >= ways[shortest_way_index][1].row) {
-          shortest_way_index = i;
-        }
-      } else {
-        if (with_final(ways[i]) && !with_final(ways[shortest_way_index])) {
-          shortest_way_index = i;
-        }
-      }
-    }
-
-    if (ways[shortest_way_index][0]) {
-      const next_move = {
-        trace_length: ways[shortest_way_index].length,
-        row_orig: ways[shortest_way_index][0].row,
-        col_orig: ways[shortest_way_index][0].col,
-        row_dest: ways[shortest_way_index][1].row,
-        col_dest: ways[shortest_way_index][1].col,
-      };
-    }
-    return ways[shortest_way_index];
-  } else {
-    setTimeout(function () {
-      console.log("There are no paths enabled");
-    }, 7000);
-    return null;
-  }
-};
-
-function nowall(paw) {
-  let result = false;
-
-  if (paw === " ") {
-    result = true;
-  }
-
-  // console.log ('nowall: ' + paw)
-  return result;
-}
-
-function permitted(paw_value) {
-  let result = false;
-
-  if (paw_value === " ") {
-    result = true;
-  } else {
-    result = false;
-  }
-
-  //console.log ('permitted: ' + result + 'paw_value' + paw_value)
-
-  return result;
-}
 
 function taken(paw, symbol) {
   const opponent = opponent_player(symbol);
