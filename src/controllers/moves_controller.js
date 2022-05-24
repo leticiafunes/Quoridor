@@ -45,15 +45,19 @@ ctrlMoves.select_move = (board, player, remaining_walls) => {
  
   let next_move  = null;
 
-  console.log ('shortest_opponent: ')  
-  console.log (shortest_opponent)  
-  console.log (remaining_walls)
 
-  if ( (remaining_walls > 0) && 
-  ((shortest_opponent.length <= shortest_player.length ) ||
-  (((shortest_opponent[0].row) < 12) && (player === "N")) ||
-  (((shortest_opponent[0].row) > 6) && (player === "S")))
-
+  if ( 
+    (remaining_walls > 0) && 
+    (
+      (shortest_opponent.length < shortest_player.length) && 
+      (
+        ((shortest_opponent[0].row < 12) && (player === "N")) || 
+        ((shortest_opponent[0].row > 6) && (player === "S"))
+ 
+      )
+ 
+ 
+    )
   )
    
   {
@@ -65,18 +69,12 @@ ctrlMoves.select_move = (board, player, remaining_walls) => {
       col:shortest_opponent[0].col 
     }
     
-    console.log ('Select mve')
-    console.log (paw)
-    console.log (shortest_opponent)
-    console.log (shortest_player)
-    console.log (shortest_opponent[0].row)
+
 
     let wall = findWallPlace (matrix, paw, opponent)
     
     if (wall) {
-      console.log (wall)
-    //revisar que vaya dividido 
-    //revisar que aun me queden paredes
+
    
     next_move = {
       type: 'wall', 
@@ -86,8 +84,7 @@ ctrlMoves.select_move = (board, player, remaining_walls) => {
       orientation: 'h'
       
     }
-    console.log ('A wall')
-    console.log ( next_move)
+
 
     }
     else {
@@ -101,7 +98,7 @@ ctrlMoves.select_move = (board, player, remaining_walls) => {
           col_dest: shortest_player[1].col/2,
         };
         
-        console.log(`next move ${next_move}`);
+
         console.log(next_move);
     
         return next_move;

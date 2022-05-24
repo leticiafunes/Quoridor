@@ -256,12 +256,13 @@ const matrix = [
   ]
 ]
 
-  //writeLog ("fede2.txt")
+ // writeLog ("fede2.txt")
   //const board = from_matrix_to_board (matrix)
   //console.log ('A'+ board+'A')
   //const paws_nexts = find_nexts (paws, matrix);
-
- // const move = select_move (board,  'S')  
+//const board = '        N     N                                                                      -*-                S                                                                         S                                                             N                                             S  '
+ const board = '                                                N N          -*- -*-  N             S-*- -*- -*-      S       S                                                                                                                                                                                  '
+const move = select_move (board, 'S', 10)  
    
 
 

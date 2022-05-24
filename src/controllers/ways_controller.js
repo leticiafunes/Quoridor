@@ -48,11 +48,10 @@ waysCtrl.shortest_way = (ways) => {
 
   if (ways.length > 0) {
     for (let i = 1; i < ways.length; i++) {
-      if (ways[shortest_way_index].length > ways[i].length) {
-        if (ways[i][1].row >= ways[shortest_way_index][1].row) {
+      if (ways[shortest_way_index].length > ways[i].length)  {        //Aqui  poner que no sea un camino trunco
           shortest_way_index = i;
         }
-      } else {
+       else {
         if (with_final(ways[i]) && !with_final(ways[shortest_way_index])) {
           shortest_way_index = i;
         }
