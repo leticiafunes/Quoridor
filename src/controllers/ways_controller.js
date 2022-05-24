@@ -43,37 +43,60 @@ waysCtrl.find_way = (paw, trace, player, matrix) => {
 };
 
 waysCtrl.shortest_way = (ways) => {
-  let shortest_way = {};
-  let shortest_way_index = 0;
+  let shortestway = null;
+  let shortest_way_index = -1;
 
   if (ways.length > 0) {
-    for (let i = 1; i < ways.length; i++) {
-      if (ways[shortest_way_index].length > ways[i].length)  {        //Aqui  poner que no sea un camino trunco
+    for (let i = 0; i < ways.length; i++) {
+      if (with_final(ways[i])){
+        if (shortest_way_index  == -1) {
           shortest_way_index = i;
         }
-       else {
-        if (with_final(ways[i]) && !with_final(ways[shortest_way_index])) {
-          shortest_way_index = i;
+        else {
+          if (ways[shortest_way_index].length > ways[i].length)  {        //Aqui  poner que no sea un camino trunco
+            shortest_way_index = i;
+          }
+        }
+
+      }
+    }
+    if (shortest_way_index < 0){
+      for (let i = 0; i < ways.length; i++) {
+        if (!with_final(ways[i])){
+          if (shortest_way_index  == -1) {
+            shortest_way_index = i;
+          }
+          else {
+            if (ways[shortest_way_index].length > ways[i].length)  {        //Aqui  poner que no sea un camino trunco
+              shortest_way_index = i;
+            }
+          }
+  
         }
       }
     }
-
     if (ways[shortest_way_index][0]) {
-      const next_move = {
+      const shortestway = {
         trace_length: ways[shortest_way_index].length,
         row_orig: ways[shortest_way_index][0].row,
         col_orig: ways[shortest_way_index][0].col,
         row_dest: ways[shortest_way_index][1].row,
         col_dest: ways[shortest_way_index][1].col,
       };
+      return shortestway;
     }
-    return ways[shortest_way_index];
-  } else {
-    setTimeout(function () {
-      console.log("There are no paths enabled");
-    }, 7000);
-    return null;
+    
+
   }
+  else {
+      return shortestway;
+
+  }
+
+ 
+
+    
+  
 };
 
 waysCtrl.find_cell = (paw, player, matrix, direction) => {

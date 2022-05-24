@@ -3,7 +3,7 @@ import { find_paws, convert_to_board} from "../controllers/matrix_controller.js"
 import { select_move,} from "../controllers/moves_controller.js";
 
 
-test('Find six paws on board', () => {
+ test('Find six paws on board', () => {
     const matrix = [
         [
           ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
@@ -266,10 +266,10 @@ test('Find six paws on board', () => {
 
   const board = convert_to_board (matrix)
   const out = { trace_length: 8, 
-    row_orig: 4, 
-    col_orig: 8, 
-    row_dest: 4, 
-    col_dest: 6,
+    row_orig: 2, 
+    col_orig: 4, 
+    row_dest: 2, 
+    col_dest: 3,
     type: "move" }
 
 
@@ -341,10 +341,10 @@ test('With behind mob', () => {
 const board = convert_to_board (matrix)
 const out = {
   trace_length: 3,
-  row_orig: 14,
-  col_orig: 14,
-  row_dest: 14,
-  col_dest: 16, 
+  row_orig: 7,
+  col_orig: 7,
+  row_dest: 7,
+  col_dest: 8, 
   type: "move"
 }
 

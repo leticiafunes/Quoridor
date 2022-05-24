@@ -61,10 +61,10 @@ const board = from_matrix_to_board(matrix);
 test("Select next move", () => {
   const expected = {
     trace_length: 3,
-    row_orig: 14,
-    col_orig: 14,
-    row_dest: 14,
-    col_dest: 16,
+    row_orig: 7,
+    col_orig: 7,
+    row_dest: 7,
+    col_dest: 8,
   };
 
   let next_move = {};
