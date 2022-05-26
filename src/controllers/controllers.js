@@ -351,10 +351,12 @@ TypeError: Cannot read properties of null (reading 'way_length')
 //const board = 'N     N                            |             -*-*             S  |               -*-                                                                 -*- -*-     -*-    N S          -*- -*-S'
 
 //se demora mucho
-const board = '      N N                                                                                                                    -*- -*- -*-    S                -*- -*- -*-                   -*- -*- -*- -*-            N                -*- -*-                                          S   S    '
+//const board = '      N N                                                                                                                    -*- -*- -*-    S                -*- -*- -*-                   -*- -*- -*- -*-            N                -*- -*-                                          S   S    '
 
 
-const move = select_move(board, "N", 0);
-console.log (move)
+
+//const OKboard = '                                                                                              -*- -*-          |    S  -*-      *  -*-     |     |          *             S N|               -*-            N                -*-   -*-              N S|         -*- -*-*                |       '
+//const move = select_move(board, "N", 0);
+//console.log (move)
 //writeLog ('fede5.txt')
 module.exports = quoridorCtrl;

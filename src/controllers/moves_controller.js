@@ -48,7 +48,10 @@ ctrlMoves.select_move = (board, player, remaining_walls, wall_turn) => {
 
 
 
-  if (shortest_way_opponent.way_length> 0) {
+  if ( (shortest_way_opponent ) && 
+       (shortest_way_player) &&
+       (shortest_way_opponent.way_length> 0) && 
+       (shortest_way_player.way_length> 0)){
     if (
       remaining_walls > 0 &&  wall_turn &&
       shortest_way_opponent.way_length < shortest_way_player.way_length &&
@@ -77,12 +80,14 @@ ctrlMoves.select_move = (board, player, remaining_walls, wall_turn) => {
       }
     }
   } else {
-    console.log(`There are no opponent paths enabled`);
+    console.log(`There are no opponent or player paths enabled`);
     
   }
 
+
+
   if (!next_move) {
-    if (shortest_way_player) {
+    if (shortest_way_player)  {
       next_move = {
         type: "move",
         way_length: shortest_way_player.way_length,
@@ -93,6 +98,10 @@ ctrlMoves.select_move = (board, player, remaining_walls, wall_turn) => {
       };
       return next_move;
     } else {
+
+
+      
+
       console.log(`There are no paths enabled`);
 
 
