@@ -37,7 +37,7 @@ utilsCtrl.writeLog = (file_name) => {
         if (KeyVal[j][0].replace(/(')/gm, "").trim() == "current_player") {
           //console.log(KeyVal[j][1]);
         }
-     if ((i>0) && (i<40)) {
+     if ((i>50) && (i<100)) {
       if (KeyVal[j][0].replace(/(')/gm, "").trim() == "board") {
         let objeto = KeyVal[j][1].replace(" ", "");
         let board = objeto.replace(/(')/gm, "");

@@ -2,22 +2,23 @@ const quoridorCtrl = {};
 const chalk = require("chalk");
 const { join } = require("path");
 const { server } = require("websocket");
-const fs = require('fs')
+const fs = require("fs");
 
-let { find_paws} = require("../utils/matrix");
-let { select_move} = require("../controllers/moves_controller");
-const { paintboard } = require("../utils/paint");
-const {from_matrix_to_board} = require ("../utils/testing")
-const {writeLog} = require ("../utils/utils")
+const { writeLog } = require("../utils/utils");
 const { findWallPlace } = require("../controllers/walls_controller");
 
+let { select_move } = require("../controllers/moves_controller");
+const { from_matrix_to_board } = require("../utils/testing");
+const { load_matrix } = require("./matrix_controller");
+const { paintboard } = require("../utils/paint");
+
+let wall_turn = true;
 
 quoridorCtrl.connectError = (error) => {
   console.log("Connect Error: " + error.toString());
 };
 
 quoridorCtrl.connectOk = (connection) => {
-  
   console.log("WebSocket Client Connected");
 
   connection.on("error", quoridorCtrl.connectOk_error);
@@ -25,16 +26,14 @@ quoridorCtrl.connectOk = (connection) => {
   connection.on("close", quoridorCtrl.connectOK_close);
 
   connection.on("message", (message) => {
-
-    
     if (message.type === "utf8") {
       let server_message = JSON.parse(message.utf8Data);
-      console.log (server_message.event );
+      console.log(server_message.event);
 
       if (server_message.event == "list_users") {
         list_users(server_message);
       }
-      
+
       if (server_message.event == "challenge") {
         challenge(server_message, connection);
       }
@@ -48,14 +47,13 @@ quoridorCtrl.connectOk = (connection) => {
   });
 };
 
-
 quoridorCtrl.connectOk_error = (error) => {
   console.log("Connection Error: " + error.toString());
-}
+};
 
 quoridorCtrl.connectOK_close = () => {
   console.log("echo-protocol Connection Closed");
-}
+};
 
 const list_users = function (server_message) {
   let console_message = "Users connected: ";
@@ -63,6 +61,7 @@ const list_users = function (server_message) {
 };
 
 const challenge = function (server_message, connection) {
+  
   const challenge_answer = JSON.stringify({
     action: "accept_challenge",
     data: {
@@ -79,111 +78,97 @@ const challenge = function (server_message, connection) {
   } catch (error) {
     console.log(error);
   }
+
 };
 
 const your_turn = function (server_message, connection) {
-
   let your_turn_answer = "";
 
-  
-  if (server_message.data.side === "N") {
-   
-    
-    const board = server_message.data.board;
-    const remaining_walls = server_message.data.walls
-   
-    const move = select_move(board, "N", remaining_walls);
 
-    console.log ('move: ' + move);
+
+  if (server_message.data.side === "N") {
+    const board = server_message.data.board;
+    const remaining_walls = server_message.data.walls;
+
+    const move = select_move(board, "N", remaining_walls, wall_turn);
+
+    console.log("move: " + move);
 
     if (move) {
-      if(move.type === 'move') {
-     
+      if (move.type === "move") {
         console.log("Movement N");
-       // console.log(move);
-  
+        // console.log(move);
+
         your_turn_answer = JSON.stringify({
           action: "move",
           data: {
             game_id: server_message.data.game_id,
             turn_token: server_message.data.turn_token,
-            from_row: move.row_orig ,
-            from_col: move.col_orig ,
-            to_row: move.row_dest ,
-            to_col: move.col_dest ,
+            from_row: move.row_orig,
+            from_col: move.col_orig,
+            to_row: move.row_dest,
+            to_col: move.col_dest,
           },
           hello: "Hi dear bot, I only know how to move paws N",
         });
+        wall_turn = true;
+      } else {
+        your_turn_answer = JSON.stringify({
+          action: "wall",
+          data: {
+            game_id: server_message.data.game_id,
+            turn_token: server_message.data.turn_token,
+            row: move.row_dest,
+            col: move.col_dest,
+            orientation: "h",
+          },
+          hello: "Hi dear bot, I only know how to build a horizontal wall N",
+        });
+        wall_turn = false;
       }
-      else {
-        your_turn_answer = JSON.stringify(
-             
-          {
-              action: "wall",
-              data: {
-                game_id: server_message.data.game_id,
-                turn_token: server_message.data.turn_token,
-                row: move.row_dest,
-                col: move.col_dest,
-                orientation: "h",
-              },
-              hello: "Hi dear bot, I only know how to build a horizontal wall N",
-            }
-          );
-      }
-    } 
-  
-
-  } 
-  else {
-
-      const board = server_message.data.board;
-      const remaining_walls = server_message.data.walls
-      
-      const move = select_move(board, "S",remaining_walls);
-      if (move) {
-        if (move.type === 'move') {
-          console.log("Movement S");
-         // console.log(move);
-    
-          your_turn_answer = JSON.stringify({
-            action: "move",
-            data: {
-              game_id: server_message.data.game_id,
-              turn_token: server_message.data.turn_token,
-              from_row: move.row_orig,
-              from_col: move.col_orig,
-              to_row: move.row_dest,
-              to_col: move.col_dest,
-            },
-            hello: "Hi dear bot, I only know how to move paws S",
-          });
-        }
-        else {
-          your_turn_answer = JSON.stringify(
-               
-            {
-                action: "wall",
-                data: {
-                  game_id: server_message.data.game_id,
-                  turn_token: server_message.data.turn_token,
-                  row: move.row_dest,
-                  col: move.col_dest,
-                  orientation: "h",
-                },
-                hello: "Hi dear bot, I only know how to build a horizontal wall S",
-              }
-            );
-    
-        }
-      }
-
-      
-  
-
     }
-  
-   
+  } else {
+    const board = server_message.data.board;
+    const remaining_walls = server_message.data.walls;
+
+    const move = select_move(board, "S", remaining_walls, wall_turn);
+    if (move) {
+      if (move.type === "move") {
+        console.log("Movement S");
+        // console.log(move);
+
+        your_turn_answer = JSON.stringify({
+          action: "move",
+          data: {
+            game_id: server_message.data.game_id,
+            turn_token: server_message.data.turn_token,
+            from_row: move.row_orig,
+            from_col: move.col_orig,
+            to_row: move.row_dest,
+            to_col: move.col_dest,
+          },
+          hello: "Hi dear bot, I only know how to move paws S",
+        });
+        wall_turn = true
+      } else {
+        your_turn_answer = JSON.stringify({
+          action: "wall",
+          data: {
+            game_id: server_message.data.game_id,
+            turn_token: server_message.data.turn_token,
+            row: move.row_dest,
+            col: move.col_dest,
+            orientation: "h",
+          },
+          hello: "Hi dear bot, I only know how to build a horizontal wall S",
+        });
+
+        wall_turn = false;
+      }
+    }
+  }
+
+
   if (your_turn_answer.length > 0) {
     const answer = connection.sendUTF(your_turn_answer);
     console.log(
@@ -198,121 +183,79 @@ const your_turn = function (server_message, connection) {
     );
   } else {
     console.log("No next move");
-    console.log (server_message.data.board);
+    console.log(server_message.data.board);
   }
 };
 /*
-const matrix = [
+const matrix2 = [
   [
-    'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N'
   ],
   [
     ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+  ],
+  [
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
     ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+   ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-'
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
-  ],
-  [
-    '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' '
-  ]
-]*/
-
-/*const matrix = [
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', '-', '*', '-', ' ', ' ', '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-'
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-', ' ', '-', '*', '-'
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-  ],
-  [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   
   [
     ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-'
+    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
   ],
   [
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' '
+    'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S'
   ]
 ]
-*/
-const matrix3 = [
+
+let paw = {
+  row: 0, 
+  col: 0,
+  id: 'N1'
+}
+const wall = findWallPlace (matrix2, paw, 'N') 
+
+//const board = from_matrix_to_board(matrix2);
+//const move = select_move(board, "N", 10);
+
+console.log(wall);*/
+
+/*
+const matrix2 = [
   [
     ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N'
   ],
@@ -366,22 +309,52 @@ const matrix3 = [
     'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S'
   ]
 ]
-
-
- // writeLog ("fede2.txt")
-//const board = from_matrix_to_board (matrix3)
-  //console.log ('A'+ board+'A')
-  //const paws_nexts = find_nexts (paws, matrix);
-//const board = '        N     N                                                                      -*-                S                                                                         S                                                             N                                             S  '
- //const board = '                                                N N          -*- -*-  N             S-*- -*- -*-      S       S                                                                                                                                                                                  '
-//const move = select_move (board, 'S', 10)  
 const paw = {
   id: 'N1',
-  row : 0, 
-  col: 0 
+  row :0, 
+  col: 0
 } 
-findWallPlace (matrix3, paw, 'N') 
-   
+let cell = {}
+cell = findWallPlace (matrix2, paw, 'N') 
+console.log (cell)
+
+*/
+/*
+
+const board = '      N     N                                    -*- -*- -*-                  S      -*-                                 -*- -*-                                                        N          -*- -*- -*- -*-                                          S     S                             '
 
 
+const move = select_move(board, "N", 0);
+
+console.log(move);*/
+
+/*const board = '        N     N                                                                                         N                -*-                               -*-                                                                                  S                                       S     S  ' 
+paintboard (board)
+const move = select_move(board, "S", 0);
+console.log (move)*/
+
+
+/*
+const board = '      N     N  -*- -*- -*- -*-
+                        -*- -*- -*- -*-      N              -*- -*- -*- -*-      S     S S'
+                        const move = select_move(board, "N", 0);
+console.log (move)
+
+  if (shortest_way_opponent.way_length > 0) {
+                            ^
+
+TypeError: Cannot read properties of null (reading 'way_length')
+
+*/ 
+
+
+//const board = 'N     N                            |             -*-*             S  |               -*-                                                                 -*- -*-     -*-    N S          -*- -*-S'
+
+//se demora mucho
+const board = '      N N                                                                                                                    -*- -*- -*-    S                -*- -*- -*-                   -*- -*- -*- -*-            N                -*- -*-                                          S   S    '
+
+
+const move = select_move(board, "N", 0);
+console.log (move)
+//writeLog ('fede5.txt')
 module.exports = quoridorCtrl;

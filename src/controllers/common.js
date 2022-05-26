@@ -1,10 +1,15 @@
 const ctrlCommon = {};
 
-ctrlCommon.nextLine = (row, col, direction, steps) => {
+ctrlCommon.nextLine = (row, col, direction, steps, player) => {
+  let sign = 1;
+  if (player === "S") {
+    sign = -1;
+  }
+
   let line = -1;
   switch (direction) {
     case "forward":
-      line = row + steps;
+      line = row + (steps*sign);
       break;
     case "right":
       line = col + steps;
@@ -13,13 +18,14 @@ ctrlCommon.nextLine = (row, col, direction, steps) => {
       line = col - steps;
       break;
     case "behind":
-      line = row - steps;
+      line = row - (steps*sign);
       break;
     default:
       console.log(`Wrong line`);
   }
   return line;
 };
+
 
 ctrlCommon.empty = (paw_value) => {
   let result = false;

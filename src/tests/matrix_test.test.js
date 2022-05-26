@@ -1,6 +1,7 @@
 import { find_paws, convert_to_board} from "../controllers/matrix_controller.js";
 
-import { select_move,} from "../controllers/moves_controller.js";
+let { select_move} = require("../controllers/moves_controller");
+const {from_matrix_to_board} = require ("../utils/testing")
 
 
  test('Find six paws on board', () => {
@@ -265,7 +266,10 @@ import { select_move,} from "../controllers/moves_controller.js";
   
 
   const board = convert_to_board (matrix)
-  const out = { trace_length: 8, 
+  
+  
+  const out = { 
+    way_length: 13, 
     row_orig: 2, 
     col_orig: 4, 
     row_dest: 2, 
@@ -273,85 +277,9 @@ import { select_move,} from "../controllers/moves_controller.js";
     type: "move" }
 
 
-    const result = select_move (board, 'N')
+    const result = select_move (board, 'N', 10)
     expect(result).toEqual (out);  
 
 }) 
 
   
-test('With behind mob', () => {
-  
-
-  const matrix = [
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-'
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
-    ],
-    
-    [
-      ' ', ' ', ' ', ' ', 'N', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
-    ],
-    [
-      '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', ' '
-    ],
-    [
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' '
-    ]
-  ]
-  
-
-const board = convert_to_board (matrix)
-const out = {
-  trace_length: 3,
-  row_orig: 7,
-  col_orig: 7,
-  row_dest: 7,
-  col_dest: 8, 
-  type: "move"
-}
-
-
-
-
-  const result = select_move (board, 'N')
-  expect(result).toEqual (out);  
-
-}) 

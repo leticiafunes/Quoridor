@@ -768,7 +768,54 @@ test ('Find next cells impossible for S6 2 4 ', () => {
 
 })
 
+test ('Find next cells impossible for S6 2 4 ', () => {
 
+  const paw = {
+    id: 'S6',
+    row : 12, 
+    col: 8  
+  } 
+
+  const expected = 
+  [ { 
+    id : 'S6',
+    row : 10, 
+    col:  8
+  },
+  { 
+    id : 'S6',
+    row : 12, 
+    col:  10
+  },
+  { 
+    id : 'S6',
+    row : 14, 
+    col:  8
+  },
+  { 
+    id : 'S6',
+    row : 12, 
+    col:  6
+  }
+  ]
+    
+  const result = []
+
+  let cell = {}
+  cell = find_cell (paw ,'S', matrix, 'forward') 
+  result.push (cell)
+  cell = find_cell (paw ,'S', matrix, 'right') 
+  result.push (cell)
+  cell = find_cell (paw ,'S', matrix, 'behind') 
+  result.push (cell)
+  cell = find_cell (paw ,'S', matrix, 'left') 
+  result.push (cell)
+
+  
+  expect(result).toMatchObject(expected);
+  
+
+})
 
 
 

@@ -220,7 +220,7 @@ test ('Find next cell for a wall 0,4', () => {
 
   const matrix2 = [
     [
-      ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N'
+      'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N'
     ],
     [
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
@@ -297,3 +297,54 @@ test ('Find next cell for a wall 0,4', () => {
     
   
   })
+  test ('Find next cell for initial with 2 max_steps N', () => {
+
+    const paw = {
+      id: 'N1',
+      row : 0, 
+      col: 0 
+    } 
+  
+    const expected = [{
+        row: 3,
+        col: 0,
+        orientation: 'h'
+  }]
+      
+    const result = []
+  
+    let cell = {}
+    cell = findWallPlace (matrix2, paw, 'N') 
+    result.push (cell)
+    
+    expect(result).toMatchObject(expected);
+    
+  
+  })
+
+
+
+  test ('Find next cell for initial with 2 max_steps S', () => {
+
+    const paw = {
+      id: 'N1',
+      row : 16, 
+      col: 8 
+    } 
+  
+    const expected = [{ row: 15, col: 8, orientation: 'h' }
+      
+  ]
+      
+    const result = []
+  
+    let cell = {}
+    cell = findWallPlace (matrix2, paw, 'S') 
+    result.push (cell)
+    
+    expect(result).toMatchObject(expected);
+    
+  
+  })
+
+  

@@ -1,7 +1,9 @@
-import { select_move,} from "../controllers/moves_controller.js";
-import { from_matrix_to_board} from "../utils/testing.js";
+let { select_move} = require("../controllers/moves_controller");
+const {from_matrix_to_board} = require ("../utils/testing")
 
-const matrix = [
+test("Select next move", () => {
+
+  const matrix = [
     [
       'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
     ],
@@ -55,12 +57,10 @@ const matrix = [
       ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' '
     ]
 ]
-
 const board = from_matrix_to_board(matrix);
 
-test("Select next move", () => {
   const expected = {
-    trace_length: 3,
+    way_length: 5,
     row_orig: 7,
     col_orig: 7,
     row_dest: 7,
@@ -68,7 +68,81 @@ test("Select next move", () => {
   };
 
   let next_move = {};
-  next_move = select_move(board, "N");
+  next_move = select_move(board, "N", 10);
 
   expect(next_move).toMatchObject(expected);
 });
+
+
+test('Testing de lio', () => {
+  
+  const matrix2 = [
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '*', '-'
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '
+    ],
+    
+    [
+      ' ', ' ', ' ', ' ', 'N', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'N', ' ', ' '
+    ],
+    [
+      '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', '-', '*', '-', ' ', ' '
+    ],
+    [
+      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'S', ' ', ' ', ' ', ' ', ' ', ' '
+    ]
+  ]
+  
+  const board = from_matrix_to_board(matrix2);
+const out = {
+  way_length: 3,
+  row_orig: 7,
+  col_orig: 7,
+  row_dest: 7,
+  col_dest: 8, 
+  type: "move"
+}
+
+const move = select_move(board, "N", 10);
+console.log (move)
+  expect(move).toEqual (out);  
+
+}) 
