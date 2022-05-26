@@ -355,6 +355,7 @@ function find_lateral_way(paw, player, matrix, trace) {
   if (next_cell && !inTrace(next_cell, trace)) {
     trace.push(paw);
     the_way = waysCtrl.find_way(next_cell, trace, player, matrix);
+    //the_way = [trace]
     return the_way;
   }
   return the_way;

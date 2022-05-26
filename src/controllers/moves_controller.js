@@ -33,6 +33,9 @@ ctrlMoves.select_move = (board, player, remaining_walls, wall_turn) => {
       console.log("Waiting for ways");
     }, 7000);
   }
+  
+
+   //Si no encuentro ways
 
   let shortest_way_player = null;
   let shortest_way_opponent = null;
@@ -100,7 +103,7 @@ ctrlMoves.select_move = (board, player, remaining_walls, wall_turn) => {
     } else {
 
 
-      
+
 
       console.log(`There are no paths enabled`);
 
